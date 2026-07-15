@@ -13,13 +13,14 @@ MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
 }
 
 
+int ccc = 0;
+
+
 int MainGame::run() {
     matchAspectRatio(view, window.getSize());
 
     // clear pending inputs
     while (pollEvent());
-
-    int ccc = 0;
 
     while (window.isOpen()) {
         // process events
@@ -31,13 +32,7 @@ int MainGame::run() {
             }
         }
 
-        // draw
-        window.clear();
-        window.setView(view);
-        window.draw(spriteBg);
-        assets.cards[ccc].setPosition({62, 60});
-        window.draw(assets.cards[ccc]);
-        window.display();
+        draw();
     }
     return -1;  // if here, window has been closed
 }
@@ -45,4 +40,17 @@ int MainGame::run() {
 
 void MainGame::onResize(sf::Vector2u sz) {
     matchAspectRatio(view, sz);
+}
+
+
+void MainGame::draw() {
+    // fixed parts
+    window.clear();
+    window.setView(view);
+    window.draw(spriteBg);
+    assets.cards[ccc].setPosition({62, 60});
+    window.draw(assets.cards[ccc]);
+
+
+    window.display();
 }
