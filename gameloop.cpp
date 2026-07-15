@@ -7,9 +7,15 @@ GameLoop::GameLoop(sf::RenderWindow &w): window(w)
 
 std::optional<sf::Event> GameLoop::pollEvent() {
     auto event = window.pollEvent();
-    if (event && event->is<sf::Event::Closed>()) {
-        window.close();
-        return std::nullopt;
+    if (event) {
+        if (event->is<sf::Event::Closed>()) {
+            window.close();
+            return std::nullopt;
+        }
+        if (const auto *e = event->getIf<sf::Event::Resized>()) {
+            onResize(e->size);
+            return std::nullopt;
+        }
     }
     return event;
 }

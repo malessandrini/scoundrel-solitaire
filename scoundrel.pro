@@ -16,10 +16,14 @@ unix {
 }
 
 SOURCES += \
+    assets.cpp \
+    cards.cpp \
     gameloop.cpp \
     main.cpp \
     maingame.cpp
 
 HEADERS += \
+    assets.h \
+    cards.h \
     gameloop.h \
     maingame.h
