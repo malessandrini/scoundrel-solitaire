@@ -10,18 +10,20 @@
 class MainGame: public GameLoop {
 public:
     MainGame(sf::RenderWindow&, Assets&);
-    int run() override;
+    void run() override;
+    //void onResize(sf::Vector2u) override;
 protected:
     sf::View view;
     Assets &assets;
     sf::Sprite spriteBg;
-    void onResize(sf::Vector2u) override;
-    void draw();
+    void drawTable();
     // game state
     Deck deck;
     int health = 20;
     std::optional<Card> room[4], weapon, lastMonster;
     bool avoidedLast = false;
+    //
+    int ccc = 0;
 };
 
 

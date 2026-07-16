@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "maingame.h"
 #include "assets.h"
+#include <thread>
 
 
 int main(int, char**) {
@@ -10,7 +11,37 @@ int main(int, char**) {
 
     while (window.isOpen()) {
         MainGame mainGameLoop(window, assets);  // create new game every time it's restarted
-        int res = mainGameLoop.run();
-        if (res < 0) window.close();  // terminate program
+
+        std::thread gameThread(&MainGame::run, &mainGameLoop);
+        //mainGameLoop.onResize(window.getSize());  // may be needed the first time
+
+        while (window.isOpen() && !mainGameLoop.isDone) {
+            // process events
+            auto event = window.pollEvent();
+            if (event) {
+                if (event->is<sf::Event::Closed>())
+                    window.close();
+                // send event to thread
+                {
+                    std::lock_guard lk(guiMutexEvent);
+                    guiEvent = event;
+                }
+                guiCv.notify_one();
+                // wait to be notified back
+                //{
+                //    std::unique_lock lk(guiMutexEvent);
+                //    guiCv.wait(lk);
+                //}
+            }
+            // draw things
+            {
+                std::lock_guard lk(guiMutexDraw);
+                for (auto &f: drawFunctions) f();
+            }
+        }
+
+        // window has been closed ot thread terminated
+        gameThread.join();
+        if (mainGameLoop.mustQuit) break;
     }
 }

@@ -10,47 +10,39 @@ MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
         for (uint8_t v: {11, 12, 13, 14})
             deck.remove(s, v);
     deck.shuffle();
+    drawFunctions.clear();
+    drawFunctions.push_back([this](){ drawTable(); });
+    drawFunctions.push_back([](){});  // to be replaced with extra drawings
 }
 
 
-int ccc = 0;
-
-
-int MainGame::run() {
-    matchAspectRatio(view, window.getSize());
-
-    // clear pending inputs
-    while (pollEvent());
-
+void MainGame::run() {
+    //matchAspectRatio(view, window.getSize());
     while (window.isOpen()) {
-        // process events
-        while (const auto event = pollEvent()) {
-            if (const auto *e = event->getIf<sf::Event::KeyPressed>()) {
-                if (e->scancode == sf::Keyboard::Scancode::Escape)
-                    return -1;  // terminate program
+        auto event = waitEvent();
+        if (const auto *e = event.getIf<sf::Event::KeyPressed>()) {
+            if (e->scancode == sf::Keyboard::Scancode::Escape) {
+                mustQuit = true;
+                break;
+            }
+            else {
+                std::lock_guard lk(guiMutexDraw);
                 ccc = (ccc + 1) % 52;
             }
         }
-
-        draw();
+        else if (const auto *e = event.getIf<sf::Event::Resized>())
+            matchAspectRatio(view, e->size);
     }
-    return -1;  // if here, window has been closed
+    isDone = true;  // signal main thread
 }
 
 
-void MainGame::onResize(sf::Vector2u sz) {
-    matchAspectRatio(view, sz);
-}
-
-
-void MainGame::draw() {
+void MainGame::drawTable() {
     // fixed parts
     window.clear();
     window.setView(view);
     window.draw(spriteBg);
     assets.cards[ccc].setPosition({62, 60});
     window.draw(assets.cards[ccc]);
-
-
     window.display();
 }
