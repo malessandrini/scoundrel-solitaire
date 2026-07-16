@@ -14,7 +14,8 @@ public:
 protected:
     sf::View view;
     Assets &assets;
-    sf::Sprite spriteBg;
+    sf::Sprite spriteBg, spriteBack;
+    void onResize(sf::Vector2u) override;
     void drawTable();
     // game state
     Deck deck;

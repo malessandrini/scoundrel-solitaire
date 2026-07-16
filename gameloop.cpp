@@ -26,7 +26,14 @@ sf::Event GameLoop::waitEvent() {
     // the data used by the draw functions or those functions themselves, it
     // must acquire the draw mutex.
     std::unique_lock lk(guiMutexEvent);  // lock the mutex
-    if (!guiEvent) guiCv.wait(lk, [](){ return guiEvent; });  // mutex is unlocked while waiting
+    while(1) {
+        if (!guiEvent) guiCv.wait(lk, [](){ return guiEvent; });  // mutex is unlocked while waiting
+        if (const auto *e = guiEvent->getIf<sf::Event::Resized>()) {
+            onResize(e->size);
+            guiEvent.reset();
+        }
+        else break;
+    }
     // an event has been sent from GUI thread
     // here we own the mutex again
     auto event = guiEvent.value();

@@ -5,11 +5,12 @@
 Assets::Assets() {
     load(bg, "bg.png");
     for (int s = 0; s < 4; ++s) load(t_cards[s], "cards" + std::to_string(s) + ".png");
+    load(back, "back.png");
     // compose the 52 sprites from textures
     cards.reserve(52);
     for (int s = 0; s < 4; ++s)
         for (int i = 0; i < 13; ++i)
-            cards.emplace_back(t_cards[s], sf::IntRect({int(144.5 * i), 0}, {135, 200}));
+            cards.emplace_back(t_cards[s], sf::IntRect({133 * i, 0}, {133, 200}));
 }
 
 

@@ -21,7 +21,7 @@ int main(int, char**) {
             if (event) {
                 if (event->is<sf::Event::Closed>())
                     window.close();
-                // send event to thread
+                // send event to thread, that's likely blocked on wait
                 {
                     std::lock_guard lk(guiMutexEvent);
                     guiEvent = event;
@@ -35,7 +35,7 @@ int main(int, char**) {
             }
         }
 
-        // window has been closed ot thread terminated
+        // window has been closed or thread terminated
         gameThread.join();
         if (mainGameLoop.mustQuit) break;
     }

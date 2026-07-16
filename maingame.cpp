@@ -3,7 +3,7 @@
 
 MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     GameLoop(w), view(window.getDefaultView()), assets(asst),
-    spriteBg(assets.bg)
+    spriteBg(assets.bg), spriteBack(assets.back)
 {
     spriteBg.setScale({view.getSize().x / assets.bg.getSize().x, view.getSize().y / assets.bg.getSize().y});  // background image can be smaller
     for (char s: {'d', 'h'})
@@ -17,7 +17,12 @@ MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
 
 
 void MainGame::run() {
-    //matchAspectRatio(view, window.getSize());
+    // set the first 4 cards
+    {
+        std::lock_guard lk(guiMutexDraw);
+        for (int i = 0; i < 4; ++i) room[i] = deck.pick();
+    }
+
     while (window.isOpen()) {
         auto event = waitEvent();
         if (const auto *e = event.getIf<sf::Event::KeyPressed>()) {
@@ -30,10 +35,14 @@ void MainGame::run() {
                 ccc = (ccc + 1) % 52;
             }
         }
-        else if (const auto *e = event.getIf<sf::Event::Resized>())
-            matchAspectRatio(view, e->size);
     }
     isDone = true;  // signal main thread
+}
+
+
+void MainGame::onResize(sf::Vector2u sz) {
+    std::lock_guard lk(guiMutexDraw);
+    matchAspectRatio(view, sz);
 }
 
 
@@ -42,7 +51,16 @@ void MainGame::drawTable() {
     window.clear();
     window.setView(view);
     window.draw(spriteBg);
-    assets.cards[ccc].setPosition(posRoom[3]);
-    window.draw(assets.cards[ccc]);
+    for (int i = 0; i < 4; ++i)
+        if (room[i]) {
+            assets.cards[room[i]->sprite_index].setPosition(posRoom[i]);
+            window.draw(assets.cards[room[i]->sprite_index]);
+        }
+    //assets.cards[ccc].setPosition(posRoom[3]);
+    //window.draw(assets.cards[ccc]);
+    if (deck.num_cards()) {
+        spriteBack.setPosition(posDeck);
+        window.draw(spriteBack);
+    }
     window.display();
 }

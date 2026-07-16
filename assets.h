@@ -13,6 +13,7 @@ public:
     // resources
     sf::Texture bg;  // background
     std::vector<sf::Sprite> cards;  // 52 sprites
+    sf::Texture back;
 protected:
     void load(sf::Texture&, std::string const&);
     fs::path basePath;

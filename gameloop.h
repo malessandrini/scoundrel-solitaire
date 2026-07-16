@@ -23,11 +23,12 @@ public:
     GameLoop(sf::RenderWindow&);
     virtual ~GameLoop() {}
     virtual void run() = 0;  // executed in another thread
-    std::atomic<bool> isDone{false}, mustQuit{false};
+    bool isDone = false, mustQuit = false;
 protected:
     sf::RenderWindow &window;
     static void matchAspectRatio(sf::View &view, sf::Vector2u winSize);
-    sf::Event waitEvent();
+    sf::Event waitEvent();  // automatically manages resize by calling onResize()
+    virtual void onResize(sf::Vector2u) {};
 };
 
 
