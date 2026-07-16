@@ -23,7 +23,6 @@ public:
     GameLoop(sf::RenderWindow&);
     virtual ~GameLoop() {}
     virtual void run() = 0;  // executed in another thread
-    //virtual void onResize(sf::Vector2u) {};  // called from main thread
     std::atomic<bool> isDone{false}, mustQuit{false};
 protected:
     sf::RenderWindow &window;

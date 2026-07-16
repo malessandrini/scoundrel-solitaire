@@ -42,7 +42,7 @@ void MainGame::drawTable() {
     window.clear();
     window.setView(view);
     window.draw(spriteBg);
-    assets.cards[ccc].setPosition({62, 60});
+    assets.cards[ccc].setPosition(posRoom[3]);
     window.draw(assets.cards[ccc]);
     window.display();
 }

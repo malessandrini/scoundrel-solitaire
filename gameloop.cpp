@@ -23,15 +23,13 @@ sf::Event GameLoop::waitEvent() {
     // When notified, return the event to the game function. Gui is
     // immediately unlocked at the end of the function, so if the caller
     // must do GUI-affecting stuff in response to this event, like changing
-    // the data used by the draw functions or those functions entirely, it
-    // must acquire another mutex.
+    // the data used by the draw functions or those functions themselves, it
+    // must acquire the draw mutex.
     std::unique_lock lk(guiMutexEvent);  // lock the mutex
-    guiCv.wait(lk, [](){ return guiEvent; });  // mutex is unlocked while waiting
+    if (!guiEvent) guiCv.wait(lk, [](){ return guiEvent; });  // mutex is unlocked while waiting
     // an event has been sent from GUI thread
     // here we own the mutex again
     auto event = guiEvent.value();
     guiEvent.reset();
-    //lk.unlock();
-    //guiCv.notify_one();  // awake the GUI thread, that is waiting for us to process the event
     return event;
 }

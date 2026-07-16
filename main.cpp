@@ -27,11 +27,6 @@ int main(int, char**) {
                     guiEvent = event;
                 }
                 guiCv.notify_one();
-                // wait to be notified back
-                //{
-                //    std::unique_lock lk(guiMutexEvent);
-                //    guiCv.wait(lk);
-                //}
             }
             // draw things
             {
