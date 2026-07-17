@@ -21,8 +21,8 @@ int main(int, char**) {
             if (event) {
                 if (event->is<sf::Event::Closed>())
                     window.close();
-                // send event to thread, that's likely blocked on wait
-                {
+                if (event->is<sf::Event::Closed>() || event->is<sf::Event::Resized>() || event->is<sf::Event::KeyPressed>() || event->is<sf::Event::MouseButtonPressed>()) {
+                    // send event to thread, that's likely blocked on wait
                     std::lock_guard lk(guiMutexEvent);
                     guiEvent = event;
                 }
@@ -32,6 +32,7 @@ int main(int, char**) {
             {
                 std::lock_guard lk(guiMutexDraw);
                 for (auto &f: drawFunctions) f();
+                window.display();
             }
         }
 

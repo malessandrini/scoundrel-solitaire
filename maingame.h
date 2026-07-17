@@ -2,31 +2,52 @@
 #define MAINGAME_H
 
 
-#include "gameloop.h"
 #include "assets.h"
 #include "cards.h"
+#include <SFML/Graphics.hpp>
+#include <condition_variable>
+#include <mutex>
+#include <vector>
+#include <functional>
 
 
-class MainGame: public GameLoop {
+extern std::mutex guiMutexEvent, guiMutexDraw;
+extern std::condition_variable guiCv;
+extern std::optional<sf::Event> guiEvent;
+extern std::vector<std::function<void()>> drawFunctions;  // to be managed by game loop
+
+
+class MainGame {
 public:
     MainGame(sf::RenderWindow&, Assets&);
-    void run() override;
+    void run();
+    bool isDone = false, mustQuit = false;  // to be checked by main thread
 protected:
+    // geometry information
+    const sf::Vector2f posDeck{62, 60}, posRoom[4]{{318, 60}, {484, 60}, {650, 60}, {816, 60}},
+        szCard{133, 200}, posAvoid{525, 280}, szAvoid{200, 50};
+    // graphics objects
+    sf::RenderWindow &window;
     sf::View view;
     Assets &assets;
     sf::Sprite spriteBg, spriteBack;
-    void onResize(sf::Vector2u) override;
+    sf::Text txtDeck, txtAvoid;
+    sf::RectangleShape rectAvoid{szAvoid};
+    //
+    sf::Event waitEvent();  // automatically manages resize by calling onResize()
+    enum class UserInput { Card, Avoid };
+    std::pair<UserInput,int> getInput();
+    void onResize(sf::Vector2u);
     void drawTable();
+    void drawAvoid();
+    static void matchAspectRatio(sf::View &view, sf::Vector2u winSize);
+    void center(sf::Text&, const sf::RectangleShape&) const;
+    int currentCards() const;
     // game state
     Deck deck;
     int health = 20;
     std::optional<Card> room[4], weapon, lastMonster;
     bool avoidedLast = false;
-    // geometry information
-    sf::Vector2f posDeck{62, 60}, posRoom[4]{{318, 60}, {484, 60}, {650, 60}, {816, 60}},
-        szCars{133, 200};
-    //
-    int ccc = 0;
 };
 
 

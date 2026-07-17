@@ -11,6 +11,8 @@ Assets::Assets() {
     for (int s = 0; s < 4; ++s)
         for (int i = 0; i < 13; ++i)
             cards.emplace_back(t_cards[s], sf::IntRect({133 * i, 0}, {133, 200}));
+    // font
+    font = sf::Font(basePath / "DejaVuSans.ttf");
 }
 
 
