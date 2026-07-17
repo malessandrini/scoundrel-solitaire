@@ -15,7 +15,7 @@ std::vector<std::function<void()>> drawFunctions;
 MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     window(w), view(window.getDefaultView()), assets(asst),
     spriteBg(assets.bg), spriteBack(assets.back),
-    txtDeck(assets.font, "", 30), txtAvoid(assets.font, "Avoid", 30)
+    txtDeck(assets.font, "", 30), txtAvoid(assets.font, "Avoid", 30), txtHealth(assets.font, "", 50)
 {
     spriteBg.setScale({view.getSize().x / assets.bg.getSize().x, view.getSize().y / assets.bg.getSize().y});  // background image can be smaller
     for (char s: {'d', 'h'})
@@ -30,6 +30,9 @@ MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     rectAvoid.setPosition(posAvoid);
     txtAvoid.setFillColor(sf::Color::Black);
     center(txtAvoid, rectAvoid);
+    rectDlg.setFillColor(sf::Color::White);
+    rectDlg.setPosition(posDlg);
+    txtHealth.setFillColor(sf::Color::Yellow);
 }
 
 
@@ -71,19 +74,6 @@ void MainGame::run() {
                     // avoid room
                 }
             }
-
-/*
-            while (true) {
-                auto event = waitEvent();
-                if (const auto *e = event.getIf<sf::Event::KeyPressed>()) {
-                    if (e->scancode == sf::Keyboard::Scancode::Escape) {
-                        isDone = true;
-                        mustQuit = true;
-                        break;
-                    }
-                }
-            }
-*/
 
         }
     }
@@ -163,6 +153,9 @@ void MainGame::drawTable() {
     txtDeck.setPosition(posDeck + szCard + sf::Vector2f{-80, 6});
     txtDeck.setString(std::to_string(deck.num_cards()));
     window.draw(txtDeck);
+    txtHealth.setString(std::to_string(health));
+    center(txtHealth, rectHealt);
+    window.draw(txtHealth);
 }
 
 
@@ -179,10 +172,16 @@ void MainGame::matchAspectRatio(sf::View &view, sf::Vector2u winSize) {
 }
 
 
-void MainGame::center(sf::Text &t, const sf::RectangleShape &rect) const {
+void MainGame::center(sf::Text &t, const sf::FloatRect &rect) const {
+    const float off = -0.2 * t.getCharacterSize();  // strings look some pixels too low
     auto r = t.getLocalBounds();
     sf::Vector2f size = r.size + r.position;
-    t.setPosition({rect.getPosition().x + (rect.getSize().x - size.x) / 2, rect.getPosition().y + (rect.getSize().y - size.y) / 2 });
+    t.setPosition({rect.position.x + (rect.size.x - size.x) / 2, rect.position.y + (rect.size.y - size.y) / 2 + off});
+}
+
+
+void MainGame::center(sf::Text &t, const sf::Shape &sh) const {
+    center(t, sh.getGlobalBounds());
 }
 
 

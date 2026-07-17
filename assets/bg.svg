@@ -28,8 +28,8 @@
      inkscape:document-units="mm"
      showgrid="true"
      inkscape:zoom="3.175"
-     inkscape:cx="172.75591"
-     inkscape:cy="110.3937"
+     inkscape:cx="159.84252"
+     inkscape:cy="127.08661"
      inkscape:window-width="1920"
      inkscape:window-height="1142"
      inkscape:window-x="0"
@@ -68,46 +68,52 @@
        inkscape:export-xdpi="150"
        inkscape:export-ydpi="150" />
     <rect
-       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect7"
-       width="10"
-       height="15"
-       x="10"
-       y="9.999999" />
+       width="8"
+       height="13"
+       x="11"
+       y="10.999999" />
     <rect
-       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect8"
-       width="10"
-       height="15"
-       x="30"
-       y="9.999999" />
+       width="8.000001"
+       height="13"
+       x="31"
+       y="10.999999" />
     <rect
-       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect9"
-       width="10"
-       height="15"
-       x="43"
-       y="9.999999" />
+       width="8.000001"
+       height="13"
+       x="44"
+       y="10.999999" />
     <rect
-       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect10"
-       width="10"
-       height="15"
-       x="56"
-       y="9.999999" />
+       width="8.0000019"
+       height="13"
+       x="57"
+       y="10.999999" />
     <rect
-       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect11"
-       width="10"
-       height="15"
-       x="69"
-       y="9.999999" />
+       width="8.0000019"
+       height="13"
+       x="70"
+       y="10.999999" />
     <rect
-       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#d4aa00;stroke-width:0.5;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect12"
-       width="10"
-       height="15"
-       x="45"
+       width="8.000001"
+       height="12.999999"
+       x="70"
        y="35" />
+    <circle
+       style="fill:none;stroke:#d4aa00;stroke-width:0.499999;stroke-linejoin:round"
+       id="path1"
+       cx="15"
+       cy="42"
+       r="4.9999995" />
   </g>
 </svg>
