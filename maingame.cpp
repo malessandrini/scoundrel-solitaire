@@ -15,7 +15,8 @@ std::vector<std::function<void()>> drawFunctions;
 MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     window(w), view(window.getDefaultView()), assets(asst),
     spriteBg(assets.bg), spriteBack(assets.back),
-    txtDeck(assets.font, "", 30), txtAvoid(assets.font, "Avoid", 30), txtHealth(assets.font, "", 50)
+    txtDeck(assets.font, "", 30), txtAvoid(assets.font, "Avoid", 30), txtHealth(assets.font, "", 50), txtDialog(assets.font, "", 30),
+    txtBtn1(assets.font, "", 30), txtBtn2(assets.font, "", 30), txtCancel(assets.font, "", 30)
 {
     spriteBg.setScale({view.getSize().x / assets.bg.getSize().x, view.getSize().y / assets.bg.getSize().y});  // background image can be smaller
     for (char s: {'d', 'h'})
@@ -30,8 +31,14 @@ MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     rectAvoid.setPosition(posAvoid);
     txtAvoid.setFillColor(sf::Color::Black);
     center(txtAvoid, rectAvoid);
-    rectDlg.setFillColor(sf::Color::White);
+    rectDlg.setFillColor(sf::Color::Green);
     rectDlg.setPosition(posDlg);
+    rectBtn1.setFillColor(sf::Color::White);
+    rectBtn1.setPosition(posBtn1);
+    rectBtn2.setFillColor(sf::Color::White);
+    rectBtn2.setPosition(posBtn2);
+    rectCancel.setFillColor(sf::Color::White);
+    rectCancel.setPosition(posCancel);
     txtHealth.setFillColor(sf::Color::Yellow);
 }
 
@@ -165,6 +172,22 @@ void MainGame::drawAvoid() {
 }
 
 
+void MainGame::drawDialog() {
+    window.draw(rectDlg);
+    window.draw(txtDialog);
+    window.draw(rectBtn1);
+    window.draw(txtBtn1);
+    if (dlgBtn2.size()) {
+        window.draw(rectBtn2);
+        window.draw(txtBtn2);
+    }
+    if (dlgCancel) {
+        window.draw(rectCancel);
+        window.draw(txtCancel);
+    }
+}
+
+
 void MainGame::matchAspectRatio(sf::View &view, sf::Vector2u winSize) {
     const float aspect_ratio = (float)view.getSize().x / view.getSize().y, new_asp = (float)winSize.x / winSize.y;
     if (new_asp > aspect_ratio) view.setViewport(sf::FloatRect({(1 - aspect_ratio / new_asp) / 2, 0}, {aspect_ratio / new_asp, 1}));
@@ -187,4 +210,24 @@ void MainGame::center(sf::Text &t, const sf::Shape &sh) const {
 
 int MainGame::currentCards() const {
     return std::count_if(std::begin(room), std::end(room), [](auto &r){ return r; });
+}
+
+
+void MainGame::setupDialog(const std::string &text, const std::string &btn1, const std::string &btn2, bool cancel) {
+    dlgText = text;
+    txtDialog.setString(dlgText);
+    center(txtDialog, rectDlg);
+    dlgBtn1 = btn1;
+    txtBtn1.setString(dlgBtn1);
+    center(txtBtn1, rectBtn1);
+    dlgBtn2 = btn2;
+    if (dlgBtn2.size()) {
+        txtBtn2.setString(dlgBtn2);
+        center(txtBtn2, rectBtn2);
+    }
+    dlgCancel = cancel;
+    if (dlgCancel) {
+        txtCancel.setString("X");
+        center(txtCancel, rectCancel);
+    }
 }
