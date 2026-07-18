@@ -25,7 +25,7 @@ public:
 protected:
     // geometry information
     const sf::Vector2f posDeck{62, 60}, posRoom[4]{{318, 60}, {484, 60}, {650, 60}, {816, 60}},
-        szCard{133, 200}, posAvoid{525, 280}, szAvoid{200, 50};
+        szCard{133, 200}, posAvoid{525, 280}, szAvoid{200, 50}, posWeapon{816, 370}, offKilledMonster{0, 40};
     const sf::FloatRect rectHealt{{64, 412}, {128, 128}};
     // geometry and data for dialog box
     const sf::Vector2f posDlg{250, 400}, szDlg{500, 340}, szBtn12{170, 30}, szBtnCancel{80, 30},
@@ -47,6 +47,7 @@ protected:
     void drawTable();
     void drawAvoid();
     void drawDialog();
+    void draw4Backs();
     static void matchAspectRatio(sf::View &view, sf::Vector2u winSize);
     void center(sf::Text&, const sf::FloatRect&, sf::Vector2f off = {0, 0}) const;
     void center(sf::Text&, const sf::Shape&, sf::Vector2f off = {0, 0}) const;

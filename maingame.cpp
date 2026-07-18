@@ -69,6 +69,7 @@ void MainGame::run() {
             }
 
             // wait: pick a card or avoid room (if enabled)
+            bool usedHeart = false;  // in this turn
             while (currentCards() > 1) {
                 bool canAvoid = !avoidedLast && currentCards() == 4;
                 { std::lock_guard lk(guiMutexDraw);
@@ -79,13 +80,68 @@ void MainGame::run() {
                 std::cout << (int)input << " " << index << std::endl;
                 if (input == UserInput::Card && room[index]) {
                     // play a card
+                    Card card = room[index].value();
+                    if (card.suit == 'd') {
+                        // weapon
+                        if (showDialog("Equip weapon?", "Equip", "", true) == UserInput::Btn1) {
+                            std::lock_guard lk(guiMutexDraw);
+                            room[index].reset();
+                            lastMonster.reset();
+                            weapon = card;
+                            avoidedLast = false;
+                        }
+                    }
+                    else if (card.suit == 'h') {
+                        // potion
+                        if (showDialog("Use potion?", (usedHeart ? "Discard" : "Heal"), "", true) == UserInput::Btn1) {
+                            std::lock_guard lk(guiMutexDraw);
+                            room[index].reset();
+                            if (!usedHeart) health = std::min(20, health + card.value);
+                            usedHeart = true;
+                            avoidedLast = false;
+                        }
+                    }
+                    else {
+                        // monster
+                        const bool canWeapon = weapon && (!lastMonster || lastMonster->value > card.value);
+                        auto res = showDialog("Fight monster (" + std::to_string(card.value) + ")?", "Barehand", (canWeapon ? "Weapon" : ""), true);
+                        if (res == UserInput::Btn1) {  // barehand
+                            std::lock_guard lk(guiMutexDraw);
+                            room[index].reset();
+                            int damage = card.value;
+                            health = std::max(0, health - damage);
+                            avoidedLast = false;
+                        }
+                        else if (res == UserInput::Btn2 && canWeapon) {  // weapon
+                            std::lock_guard lk(guiMutexDraw);
+                            room[index].reset();
+                            int damage = card.value > weapon->value ? card.value - weapon->value : 0;
+                            health = std::max(0, health - damage);
+                            lastMonster = card;
+                            avoidedLast = false;
+                        }
+                        if (health <= 0) {
+                            // TODO: die
+                        }
+                    }
                 }
                 else if (input == UserInput::Avoid && canAvoid) {
                     // avoid room
-                    showDialog("Avoid room?", "Avoid", "", true);
+                    if (showDialog("Avoid room?", "Avoid", "", true) == UserInput::Btn1) {
+                        { std::lock_guard lk(guiMutexDraw); drawFunctions[1] = [this](){ draw4Backs(); }; }
+                        std::this_thread::sleep_for(500ms);
+                        avoidedLast = true;
+                        {
+                            std::lock_guard lk(guiMutexDraw); drawFunctions[1] = [](){};
+                            for (int i = 0; i < 4; ++i) {
+                                Card c = room[i].value();
+                                room[i].reset();
+                                deck.add(c);  // TODO: shuffle the 4 cards before putting back
+                            }
+                        }
+                    }
                 }
             }
-
         }
     }
     catch (WindowClosed&) {
@@ -152,11 +208,13 @@ void MainGame::drawTable() {
     window.clear();
     window.setView(view);
     window.draw(spriteBg);
+    // cardd in the room
     for (int i = 0; i < 4; ++i)
         if (room[i]) {
             assets.cards[room[i]->sprite_index].setPosition(posRoom[i]);
             window.draw(assets.cards[room[i]->sprite_index]);
         }
+    // back of deck and number of cards
     if (deck.num_cards()) {
         spriteBack.setPosition(posDeck);
         window.draw(spriteBack);
@@ -164,9 +222,19 @@ void MainGame::drawTable() {
     txtDeck.setPosition(posDeck + szCard + sf::Vector2f{-80, 6});
     txtDeck.setString(std::to_string(deck.num_cards()));
     window.draw(txtDeck);
+    // health
     txtHealth.setString(std::to_string(health));
     center(txtHealth, rectHealt);
     window.draw(txtHealth);
+    // weapon and last killed monster
+    if (weapon) {
+        assets.cards[weapon->sprite_index].setPosition(posWeapon);
+        window.draw(assets.cards[weapon->sprite_index]);
+    }
+    if (lastMonster) {
+        assets.cards[lastMonster->sprite_index].setPosition(posWeapon + offKilledMonster);
+        window.draw(assets.cards[lastMonster->sprite_index]);
+    }
 }
 
 
@@ -192,6 +260,14 @@ void MainGame::drawDialog() {
 }
 
 
+void MainGame::draw4Backs() {
+    for (int i = 0; i < 4; ++i) {
+        spriteBack.setPosition(posRoom[i]);
+        window.draw(spriteBack);
+    }
+}
+
+
 void MainGame::matchAspectRatio(sf::View &view, sf::Vector2u winSize) {
     const float aspect_ratio = (float)view.getSize().x / view.getSize().y, new_asp = (float)winSize.x / winSize.y;
     if (new_asp > aspect_ratio) view.setViewport(sf::FloatRect({(1 - aspect_ratio / new_asp) / 2, 0}, {aspect_ratio / new_asp, 1}));
@@ -200,7 +276,7 @@ void MainGame::matchAspectRatio(sf::View &view, sf::Vector2u winSize) {
 
 
 void MainGame::center(sf::Text &t, const sf::FloatRect &rect, sf::Vector2f off) const {
-    const float off_x = off.x, off_y = -0.2 * t.getCharacterSize() + off.y;  // strings look some pixels too low
+    const float off_x = off.x, off_y = -0.1 * t.getCharacterSize() + off.y;  // strings look some pixels too low
     auto r = t.getLocalBounds();
     sf::Vector2f size = r.size + r.position;
     t.setPosition({rect.position.x + (rect.size.x - size.x) / 2 + off_x, rect.position.y + (rect.size.y - size.y) / 2 + off_y});
