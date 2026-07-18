@@ -15,8 +15,8 @@ std::vector<std::function<void()>> drawFunctions;
 MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     window(w), view(window.getDefaultView()), assets(asst),
     spriteBg(assets.bg), spriteBack(assets.back),
-    txtDeck(assets.font, "", 30), txtAvoid(assets.font, "Avoid", 30), txtHealth(assets.font, "", 50), txtDialog(assets.font, "", 30),
-    txtBtn1(assets.font, "", 30), txtBtn2(assets.font, "", 30), txtCancel(assets.font, "", 30)
+    txtDeck(assets.font, "", 30), txtAvoid(assets.font, "Avoid", 30), txtHealth(assets.font, "", 50), txtDialog(assets.font, "", 35),
+    txtBtn1(assets.font, "", 25), txtBtn2(assets.font, "", 25), txtCancel(assets.font, "", 25)
 {
     spriteBg.setScale({view.getSize().x / assets.bg.getSize().x, view.getSize().y / assets.bg.getSize().y});  // background image can be smaller
     for (char s: {'d', 'h'})
@@ -31,7 +31,7 @@ MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     rectAvoid.setPosition(posAvoid);
     txtAvoid.setFillColor(sf::Color::Black);
     center(txtAvoid, rectAvoid);
-    rectDlg.setFillColor(sf::Color::Green);
+    rectDlg.setFillColor(sf::Color(0x003000FF));
     rectDlg.setPosition(posDlg);
     rectBtn1.setFillColor(sf::Color::White);
     rectBtn1.setPosition(posBtn1);
@@ -40,6 +40,9 @@ MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     rectCancel.setFillColor(sf::Color::White);
     rectCancel.setPosition(posCancel);
     txtHealth.setFillColor(sf::Color::Yellow);
+    txtBtn1.setFillColor(sf::Color::Black);
+    txtBtn2.setFillColor(sf::Color::Black);
+    txtCancel.setFillColor(sf::Color::Black);
 }
 
 
@@ -79,6 +82,7 @@ void MainGame::run() {
                 }
                 else if (input == UserInput::Avoid && canAvoid) {
                     // avoid room
+                    showDialog("Avoid room?", "Avoid", "", true);
                 }
             }
 
@@ -195,16 +199,16 @@ void MainGame::matchAspectRatio(sf::View &view, sf::Vector2u winSize) {
 }
 
 
-void MainGame::center(sf::Text &t, const sf::FloatRect &rect) const {
-    const float off = -0.2 * t.getCharacterSize();  // strings look some pixels too low
+void MainGame::center(sf::Text &t, const sf::FloatRect &rect, sf::Vector2f off) const {
+    const float off_x = off.x, off_y = -0.2 * t.getCharacterSize() + off.y;  // strings look some pixels too low
     auto r = t.getLocalBounds();
     sf::Vector2f size = r.size + r.position;
-    t.setPosition({rect.position.x + (rect.size.x - size.x) / 2, rect.position.y + (rect.size.y - size.y) / 2 + off});
+    t.setPosition({rect.position.x + (rect.size.x - size.x) / 2 + off_x, rect.position.y + (rect.size.y - size.y) / 2 + off_y});
 }
 
 
-void MainGame::center(sf::Text &t, const sf::Shape &sh) const {
-    center(t, sh.getGlobalBounds());
+void MainGame::center(sf::Text &t, const sf::Shape &sh, sf::Vector2f off) const {
+    center(t, sh.getGlobalBounds(), off);
 }
 
 
@@ -213,10 +217,10 @@ int MainGame::currentCards() const {
 }
 
 
-void MainGame::setupDialog(const std::string &text, const std::string &btn1, const std::string &btn2, bool cancel) {
+MainGame::UserInput MainGame::showDialog(const std::string &text, const std::string &btn1, const std::string &btn2, bool cancel) {
     dlgText = text;
     txtDialog.setString(dlgText);
-    center(txtDialog, rectDlg);
+    center(txtDialog, rectDlg, {0, -30});
     dlgBtn1 = btn1;
     txtBtn1.setString(dlgBtn1);
     center(txtBtn1, rectBtn1);
@@ -229,5 +233,30 @@ void MainGame::setupDialog(const std::string &text, const std::string &btn1, con
     if (dlgCancel) {
         txtCancel.setString("X");
         center(txtCancel, rectCancel);
+    }
+    { std::lock_guard lk(guiMutexDraw);  drawFunctions[1] = [this](){ drawDialog(); }; }
+
+    // object to remove drawDialog() function at function exit
+    struct Exit {
+        Exit() {}
+        ~Exit() { std::lock_guard lk(guiMutexDraw);  drawFunctions[1] = [](){}; }
+    };
+    Exit ex;
+
+    // wait user action
+    while(1) {
+        auto event = waitEvent();
+        if (const auto *e = event.getIf<sf::Event::KeyPressed>()) {
+            if (e->code == sf::Keyboard::Key::Num1) return UserInput::Btn1;
+            if (e->code == sf::Keyboard::Key::Num2 && dlgBtn2.size()) return UserInput::Btn2;
+            if (e->code == sf::Keyboard::Key::Escape && dlgCancel) return UserInput::Cancel;
+        }
+        if (const auto *e = event.getIf<sf::Event::MouseButtonPressed>()) {
+            if (e->button != sf::Mouse::Button::Left) continue;
+            auto pos = window.mapPixelToCoords(e->position);
+            if (sf::FloatRect(posBtn1, szBtn12).contains(pos)) return UserInput::Btn1;
+            if (sf::FloatRect(posBtn2, szBtn12).contains(pos) && dlgBtn2.size()) return UserInput::Btn2;
+            if (sf::FloatRect(posCancel, szBtnCancel).contains(pos) && dlgCancel) return UserInput::Cancel;
+        }
     }
 }

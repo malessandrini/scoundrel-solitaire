@@ -28,8 +28,8 @@ protected:
         szCard{133, 200}, posAvoid{525, 280}, szAvoid{200, 50};
     const sf::FloatRect rectHealt{{64, 412}, {128, 128}};
     // geometry and data for dialog box
-    const sf::Vector2f posDlg{250, 400}, szDlg{500, 340}, szBtn{130, 30},
-        posBtn1{250, 700}, posBtn2{400, 700}, posCancel{550, 700};
+    const sf::Vector2f posDlg{250, 400}, szDlg{500, 340}, szBtn12{170, 30}, szBtnCancel{80, 30},
+        posBtn1{260, 700}, posBtn2{450, 700}, posCancel{660, 700};
     std::string dlgText, dlgBtn1, dlgBtn2;
     bool dlgCancel;
     // graphics objects
@@ -38,20 +38,20 @@ protected:
     Assets &assets;
     sf::Sprite spriteBg, spriteBack;
     sf::Text txtDeck, txtAvoid, txtHealth, txtDialog, txtBtn1, txtBtn2, txtCancel;
-    sf::RectangleShape rectAvoid{szAvoid}, rectDlg{szDlg}, rectBtn1{szBtn}, rectBtn2{szBtn}, rectCancel{szBtn};
+    sf::RectangleShape rectAvoid{szAvoid}, rectDlg{szDlg}, rectBtn1{szBtn12}, rectBtn2{szBtn12}, rectCancel{szBtnCancel};
     //
     sf::Event waitEvent();  // automatically manages resize by calling onResize()
-    enum class UserInput { Card, Avoid };
+    enum class UserInput { Card, Avoid, Btn1, Btn2, Cancel };
     std::pair<UserInput,int> getInput();
     void onResize(sf::Vector2u);
     void drawTable();
     void drawAvoid();
     void drawDialog();
     static void matchAspectRatio(sf::View &view, sf::Vector2u winSize);
-    void center(sf::Text&, const sf::FloatRect&) const;
-    void center(sf::Text&, const sf::Shape&) const;
+    void center(sf::Text&, const sf::FloatRect&, sf::Vector2f off = {0, 0}) const;
+    void center(sf::Text&, const sf::Shape&, sf::Vector2f off = {0, 0}) const;
     int currentCards() const;
-    void setupDialog(std::string const &text, std::string const &btn1, std::string const &btn2, bool cancel);
+    UserInput showDialog(std::string const &text, std::string const &btn1, std::string const &btn2, bool cancel);
     // game state
     Deck deck;
     int health = 20;
