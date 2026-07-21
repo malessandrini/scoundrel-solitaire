@@ -2,7 +2,6 @@
 #include <thread>
 #include <chrono>
 #include <algorithm>
-#include <iostream>
 using namespace std::chrono_literals;
 
 
@@ -54,7 +53,7 @@ struct WindowClosed: public std::runtime_error {
 
 void MainGame::run() {
     try {  // to catch WindowClosed
-        while (!isDone) { // main game loop (choose card, ...)
+        while (!isDone && window.isOpen()) { // main game loop (choose card, ...)
 
             // fill the missing cards
             for (int i = 0; i < 4 && deck.num_cards(); ++i) {
@@ -65,7 +64,8 @@ void MainGame::run() {
 
             // check if victory
             if (!deck.num_cards() && currentCards() == 1) {
-                // victory! TODO
+                // victory!
+                break;  // will be tested below
             }
 
             // wait: pick a card or avoid room (if enabled)
@@ -77,7 +77,6 @@ void MainGame::run() {
                     else drawFunctions[1] = [](){};
                 }
                 auto [input, index] = getInput();
-                std::cout << (int)input << " " << index << std::endl;
                 if (input == UserInput::Card && room[index]) {
                     // play a card
                     Card card = room[index].value();
@@ -121,7 +120,7 @@ void MainGame::run() {
                             avoidedLast = false;
                         }
                         if (health <= 0) {
-                            // TODO: die
+                            break;  // will be tested below
                         }
                     }
                 }
@@ -141,8 +140,14 @@ void MainGame::run() {
                         }
                     }
                 }
-            }
-        }
+            }  // while currentCards() > 1
+            // test if died
+            if (health <= 0) break;
+        }  // main game loop
+        // Here: we won or we died
+        const int score = finalScore();
+        if (showDialog(std::string(score > 0 ? "You win!" : "You die!") +  " Score: " + std::to_string(score), "Restart", "Quit", false) == UserInput::Btn2) mustQuit = true;
+        isDone = true;
     }
     catch (WindowClosed&) {
         isDone = true;  // signal main thread
@@ -290,6 +295,28 @@ void MainGame::center(sf::Text &t, const sf::Shape &sh, sf::Vector2f off) const 
 
 int MainGame::currentCards() const {
     return std::count_if(std::begin(room), std::end(room), [](auto &r){ return r; });
+}
+
+
+int MainGame::finalScore() {
+    if (health <= 0) {
+        int score = 0;
+        while (deck.num_cards()) {
+            Card c = deck.pick();
+            if (c.suit == 's' || c.suit == 'c')  score -= c.value;
+        }
+        return score;
+    }
+    else {
+        int score = health;
+        if (score == 20)
+            for (int i = 0; i < 4; ++i)
+                if (room[i] && room[i]->suit == 'h') {  // there should be 1 only card remaining
+                    score += room[i]->value;
+                    break;
+                }
+        return score;
+    }
 }
 
 

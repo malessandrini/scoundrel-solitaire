@@ -53,6 +53,7 @@ protected:
     void center(sf::Text&, const sf::Shape&, sf::Vector2f off = {0, 0}) const;
     int currentCards() const;
     UserInput showDialog(std::string const &text, std::string const &btn1, std::string const &btn2, bool cancel);
+    int finalScore();
     // game state
     Deck deck;
     int health = 20;
