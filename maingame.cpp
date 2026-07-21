@@ -308,10 +308,8 @@ int MainGame::currentCards() const {
 int MainGame::finalScore() {
     if (health <= 0) {
         int score = 0;
-        while (deck.num_cards()) {
-            Card c = deck.pick();
+        for (const Card &c: deck.deck())
             if (c.suit == 's' || c.suit == 'c')  score -= c.value;
-        }
         return score;
     }
     else {
@@ -330,7 +328,7 @@ int MainGame::finalScore() {
 MainGame::UserInput MainGame::showDialog(const std::string &text, const std::string &btn1, const std::string &btn2, bool cancel) {
     dlgText = text;
     txtDialog.setString(dlgText);
-    center(txtDialog, rectDlg, {0, -30});
+    center(txtDialog, rectDlg, cancel ? sf::Vector2f(0, 0): sf::Vector2f(0, -30));
     dlgBtn1 = btn1;
     txtBtn1.setString(dlgBtn1);
     center(txtBtn1, rectBtn1);
