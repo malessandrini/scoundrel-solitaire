@@ -41,7 +41,7 @@ protected:
     sf::RectangleShape rectAvoid{szAvoid}, rectDlg{szDlg}, rectBtn1{szBtn12}, rectBtn2{szBtn12}, rectCancel{szBtnCancel};
     //
     sf::Event waitEvent();  // automatically manages resize by calling onResize()
-    enum class UserInput { Card, Avoid, Btn1, Btn2, Cancel };
+    enum class UserInput { Card, Avoid, Btn1, Btn2, Cancel, Esc };
     std::pair<UserInput,int> getInput();
     void onResize(sf::Vector2u);
     void drawTable();

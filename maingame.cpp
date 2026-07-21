@@ -140,6 +140,12 @@ void MainGame::run() {
                         }
                     }
                 }
+                else if (input == UserInput::Esc) {
+                    if (showDialog("Quit game?", "Quit", "", true) == UserInput::Btn1) {
+                        mustQuit = true;
+                        throw WindowClosed();
+                    }
+                }
             }  // while currentCards() > 1
             // test if died
             if (health <= 0) break;
@@ -190,6 +196,7 @@ std::pair<MainGame::UserInput, int> MainGame::getInput() {
             if (e->code == sf::Keyboard::Key::Num3) return {UserInput::Card, 2};
             if (e->code == sf::Keyboard::Key::Num4) return {UserInput::Card, 3};
             if (e->code == sf::Keyboard::Key::A) return {UserInput::Avoid, 0};
+            if (e->code == sf::Keyboard::Key::Escape) return {UserInput::Esc, 0};
         }
         if (const auto *e = event.getIf<sf::Event::MouseButtonPressed>()) {
             if (e->button != sf::Mouse::Button::Left) continue;
