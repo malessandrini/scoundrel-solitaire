@@ -28,15 +28,16 @@ protected:
         szCard{133, 200}, posAvoid{525, 300}, szAvoid{200, 50}, posWeapon{816, 430}, offKilledMonster{0, 40};
     const sf::FloatRect rectHealt{{64, 472}, {128, 128}};
     // geometry and data for dialog box
-    const sf::Vector2f posDlg{250, 150}, szDlg{500, 240}, szBtn12{170, 30}, szBtnCancel{80, 30},
-        posBtn1{260, 350}, posBtn2{570, 350}, posCancel{660, 160};
+    const sf::Vector2f posDlg{250, 150}, szDlg{500, 240}, szBtn12{190, 35}, szBtnCancel{80, 35},
+        posBtn1{260, 340}, posBtn2{550, 340}, posCancel{660, 160};
     std::string dlgText, dlgBtn1, dlgBtn2;
     bool dlgCancel;
+    sf::Sprite *dlgSpr1, *dlgSpr2;  // can be the same
     // graphics objects
     sf::RenderWindow &window;
     sf::View view;
     Assets &assets;
-    sf::Sprite spriteBg, spriteBack;
+    sf::Sprite spriteBg, spriteBack, spriteSkull;
     sf::Text txtDeck, txtAvoid, txtHealth, txtDialog, txtBtn1, txtBtn2, txtCancel;
     sf::RectangleShape rectAvoid{szAvoid}, rectDlg{szDlg}, rectBtn1{szBtn12}, rectBtn2{szBtn12}, rectCancel{szBtnCancel};
     //
@@ -51,9 +52,11 @@ protected:
     static void matchAspectRatio(sf::View &view, sf::Vector2u winSize);
     void center(sf::Text&, const sf::FloatRect&, sf::Vector2f off = {0, 0}) const;
     void center(sf::Text&, const sf::Shape&, sf::Vector2f off = {0, 0}) const;
+    void center(sf::Sprite&, const sf::FloatRect&) const;
     int currentCards() const;
-    UserInput showDialog(std::string const &text, std::string const &btn1, std::string const &btn2, bool cancel);
-    int finalScore();
+    UserInput showDialog(std::string const &text, std::string const &btn1, std::string const &btn2, bool cancel,
+        sf::Sprite *spr1 = nullptr, sf::Sprite *spr2 = nullptr);
+    int finalScore() const;
     // game state
     Deck deck;
     int health = 20;

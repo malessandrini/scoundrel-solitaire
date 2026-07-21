@@ -13,7 +13,7 @@ std::vector<std::function<void()>> drawFunctions;
 
 MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     window(w), view(window.getDefaultView()), assets(asst),
-    spriteBg(assets.bg), spriteBack(assets.back),
+    spriteBg(assets.bg), spriteBack(assets.back), spriteSkull(assets.skull),
     txtDeck(assets.font, "", 30), txtAvoid(assets.font, "Avoid", 30), txtHealth(assets.font, "", 50), txtDialog(assets.font, "", 35),
     txtBtn1(assets.font, "", 25), txtBtn2(assets.font, "", 25), txtCancel(assets.font, "", 25)
 {
@@ -42,6 +42,7 @@ MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     txtBtn1.setFillColor(sf::Color::Black);
     txtBtn2.setFillColor(sf::Color::Black);
     txtCancel.setFillColor(sf::Color::Black);
+    spriteSkull.setOrigin(spriteSkull.getLocalBounds().getCenter());
 }
 
 
@@ -103,19 +104,19 @@ void MainGame::run() {
                     else {
                         // monster
                         const bool canWeapon = weapon && (!lastMonster || lastMonster->value > card.value);
-                        auto res = showDialog("Fight monster (" + std::to_string(card.value) + ")?", "Barehand", (canWeapon ? "Weapon" : ""), true);
+                        int damageBare = card.value, damageWeapon = canWeapon ? (card.value > weapon->value ? card.value - weapon->value : 0) : 0;
+                        auto res = showDialog("Fight monster (" + std::to_string(card.value) + ")?", "Barehand", (canWeapon ? "Weapon" : ""), true,
+                            &spriteSkull, &spriteSkull);
                         if (res == UserInput::Btn1) {  // barehand
                             std::lock_guard lk(guiMutexDraw);
                             room[index].reset();
-                            int damage = card.value;
-                            health = std::max(0, health - damage);
+                            health = std::max(0, health - damageBare);
                             avoidedLast = false;
                         }
                         else if (res == UserInput::Btn2 && canWeapon) {  // weapon
                             std::lock_guard lk(guiMutexDraw);
                             room[index].reset();
-                            int damage = card.value > weapon->value ? card.value - weapon->value : 0;
-                            health = std::max(0, health - damage);
+                            health = std::max(0, health - damageWeapon);
                             lastMonster = card;
                             avoidedLast = false;
                         }
@@ -152,7 +153,7 @@ void MainGame::run() {
         }  // main game loop
         // Here: we won or we died
         const int score = finalScore();
-        if (showDialog(std::string(score > 0 ? "You win!" : "You die!") +  " Score: " + std::to_string(score), "Restart", "Quit", false) == UserInput::Btn2) mustQuit = true;
+        if (showDialog(std::string(score > 0 ? "You win!" : "You die!") +  "   Score: " + std::to_string(score), "Restart", "Quit", false) == UserInput::Btn2) mustQuit = true;
         isDone = true;
     }
     catch (WindowClosed&) {
@@ -231,7 +232,7 @@ void MainGame::drawTable() {
         spriteBack.setPosition(posDeck);
         window.draw(spriteBack);
     }
-    txtDeck.setPosition(posDeck + szCard + sf::Vector2f{-80, 6});
+    txtDeck.setPosition(posDeck + szCard + sf::Vector2f{-80, 20});
     txtDeck.setString(std::to_string(deck.num_cards()));
     window.draw(txtDeck);
     // health
@@ -257,11 +258,20 @@ void MainGame::drawAvoid() {
 
 
 void MainGame::drawDialog() {
+    static const sf::Vector2f offSpr{0, -50};
     window.draw(rectDlg);
     window.draw(txtDialog);
+    if (dlgSpr1) {
+        dlgSpr1->setPosition(rectBtn1.getGlobalBounds().getCenter() + offSpr);
+        window.draw(*dlgSpr1);
+    }
     window.draw(rectBtn1);
     window.draw(txtBtn1);
     if (dlgBtn2.size()) {
+        if (dlgSpr2) {
+            dlgSpr2->setPosition(rectBtn2.getGlobalBounds().getCenter() + offSpr);
+            window.draw(*dlgSpr2);
+        }
         window.draw(rectBtn2);
         window.draw(txtBtn2);
     }
@@ -305,7 +315,7 @@ int MainGame::currentCards() const {
 }
 
 
-int MainGame::finalScore() {
+int MainGame::finalScore() const {
     if (health <= 0) {
         int score = 0;
         for (const Card &c: deck.deck())
@@ -325,10 +335,10 @@ int MainGame::finalScore() {
 }
 
 
-MainGame::UserInput MainGame::showDialog(const std::string &text, const std::string &btn1, const std::string &btn2, bool cancel) {
+MainGame::UserInput MainGame::showDialog(const std::string &text, const std::string &btn1, const std::string &btn2, bool cancel, sf::Sprite *spr1, sf::Sprite *spr2) {
     dlgText = text;
     txtDialog.setString(dlgText);
-    center(txtDialog, rectDlg, cancel ? sf::Vector2f(0, 0): sf::Vector2f(0, -30));
+    center(txtDialog, rectDlg, cancel ? sf::Vector2f(0, -30): sf::Vector2f(0, -30));
     dlgBtn1 = btn1;
     txtBtn1.setString(dlgBtn1);
     center(txtBtn1, rectBtn1);
@@ -342,6 +352,8 @@ MainGame::UserInput MainGame::showDialog(const std::string &text, const std::str
         txtCancel.setString("X");
         center(txtCancel, rectCancel);
     }
+    dlgSpr1 = spr1;
+    dlgSpr2 = spr2;
     { std::lock_guard lk(guiMutexDraw);  drawFunctions[1] = [this](){ drawDialog(); }; }
 
     // object to remove drawDialog() function at function exit

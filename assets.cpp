@@ -6,6 +6,7 @@ Assets::Assets() {
     load(bg, "bg.png");
     for (int s = 0; s < 4; ++s) load(t_cards[s], "cards" + std::to_string(s) + ".png");
     load(back, "back.png");
+    load(skull, "skull.png");
     // compose the 52 sprites from textures
     cards.reserve(52);
     for (int s = 0; s < 4; ++s)

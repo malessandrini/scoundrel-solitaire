@@ -15,6 +15,7 @@ public:
     std::vector<sf::Sprite> cards;  // 52 sprites
     sf::Texture back;
     sf::Font font;
+    sf::Texture skull;
 protected:
     void load(sf::Texture&, std::string const&);
     fs::path basePath;
