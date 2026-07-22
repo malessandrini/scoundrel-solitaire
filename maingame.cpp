@@ -123,6 +123,7 @@ void MainGame::run() {
                         std::this_thread::sleep_for(500ms);
                         avoidedLast = true;
                         syncGui([this](){
+                            drawFunctions[1] = [](){};
                             for (int i = 0; i < 4; ++i) {
                                 Card c = room[i].value();
                                 room[i].reset();
