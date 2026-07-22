@@ -27,6 +27,7 @@ MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     drawFunctions.push_back([](){});  // to be replaced with extra drawings
     center(txtAvoid, rectAvoid);
     assets.skull.setOrigin(assets.skull.getLocalBounds().getCenter());
+    animHealth.reset();
 }
 
 
@@ -84,7 +85,10 @@ void MainGame::run() {
                         if (showDialog("Use potion?", (usedHeart ? "Discard" : "Heal"), "", true) == UserInput::Btn1) {
                             syncGui([this, id=index, &card, &usedHeart](){
                                 room[id].reset();
-                                if (!usedHeart) health = std::min(20, health + card.value);
+                                if (!usedHeart) {
+                                    health = std::min(20, health + card.value);
+                                    animHealth.restart();
+                                }
                                 usedHeart = true;
                                 avoidedLast = false;
                             });
@@ -100,6 +104,7 @@ void MainGame::run() {
                             syncGui([this, id=index, damageBare](){
                                 room[id].reset();
                                 health = std::max(0, health - damageBare);
+                                if (damageBare) animHealth.restart();
                                 avoidedLast = false;
                             });
                         }
@@ -107,6 +112,7 @@ void MainGame::run() {
                             syncGui([this, id=index, &card, damageWeapon](){
                                 room[id].reset();
                                 health = std::max(0, health - damageWeapon);
+                                if (damageWeapon) animHealth.restart();
                                 lastMonster = card;
                                 avoidedLast = false;
                             });
@@ -143,6 +149,7 @@ void MainGame::run() {
             if (health <= 0) break;
         }  // main game loop
         // Here: we won or we died
+        while (animHealth.isRunning());
         const int score = finalScore();
         if (showDialog(std::string(score > 0 ? "You win!" : "You die!") +  "   Score: " + std::to_string(score), "Restart", "Quit", false) == UserInput::Btn2) mustQuit = true;
         isDone = true;
@@ -227,7 +234,15 @@ void MainGame::drawTable() {
     window.draw(txtDeck);
     // health
     txtHealth.setString(std::to_string(health));
-    center(txtHealth, rectHealt);
+    if (animHealth.isRunning() && animHealth.getElapsedTime() < 400ms) {
+        txtHealth.setCharacterSize(100);
+        center(txtHealth, rectHealt, {0, -50 + animHealth.getElapsedTime().asMilliseconds() / 8.f});
+    }
+    else {
+        animHealth.reset();
+        txtHealth.setCharacterSize(50);
+        center(txtHealth, rectHealt);
+    }
     window.draw(txtHealth);
     // weapon and last killed monster
     if (weapon) {

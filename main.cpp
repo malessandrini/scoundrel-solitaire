@@ -13,7 +13,6 @@ int main(int, char**) {
         MainGame mainGameLoop(window, assets);  // create new game every time it's restarted
 
         std::thread gameThread(&MainGame::run, &mainGameLoop);
-        //mainGameLoop.onResize(window.getSize());  // may be needed the first time
 
         while (window.isOpen() && !mainGameLoop.isDone) {
             // process events

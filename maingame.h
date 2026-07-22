@@ -40,6 +40,7 @@ protected:
     MyText txtDeck, txtAvoid, txtHealth, txtDialog, txtBtn1, txtBtn2, txtCancel;
     MyRectangleShape rectAvoid{szAvoid, sf::Color::White, posAvoid}, rectDlg{szDlg, sf::Color(0x003000FF), posDlg},
         rectBtn1{szBtn12, sf::Color::White, posBtn1}, rectBtn2{szBtn12, sf::Color::White, posBtn2}, rectCancel{szBtnCancel, sf::Color::White, posCancel};
+    sf::Clock animHealth;
     //
     static void syncGui(std::function<void()>);  // execute a task by syncing on guiMutexDraw
     sf::Event waitEvent();  // automatically manages resize by calling onResize()
