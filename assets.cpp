@@ -2,11 +2,17 @@
 #include <stdexcept>
 
 
+sf::Texture MySprite::dummyTexture;
+
+
 Assets::Assets() {
-    load(bg, "bg.png");
+    load(t_bg, "bg.png");
+    bg = MySprite(t_bg);
     for (int s = 0; s < 4; ++s) load(t_cards[s], "cards" + std::to_string(s) + ".png");
-    load(back, "back.png");
-    load(skull, "skull.png");
+    load(t_back, "back.png");
+    load(t_skull, "skull.png");
+    back = MySprite(t_back);
+    skull = MySprite(t_skull);
     // compose the 52 sprites from textures
     cards.reserve(52);
     for (int s = 0; s < 4; ++s)

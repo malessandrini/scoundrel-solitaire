@@ -13,11 +13,11 @@ std::vector<std::function<void()>> drawFunctions;
 
 MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     window(w), view(window.getDefaultView()), assets(asst),
-    spriteBg(assets.bg), spriteBack(assets.back), spriteSkull(assets.skull),
-    txtDeck(assets.font, "", 30), txtAvoid(assets.font, "Avoid", 30), txtHealth(assets.font, "", 50), txtDialog(assets.font, "", 35),
-    txtBtn1(assets.font, "", 25), txtBtn2(assets.font, "", 25), txtCancel(assets.font, "", 25)
+    txtDeck(assets.font, "", 30, sf::Color::White), txtAvoid(assets.font, "Avoid", 30, sf::Color::Black),
+    txtHealth(assets.font, "", 50, sf::Color::Yellow), txtDialog(assets.font, "", 35, sf::Color::White), txtBtn1(assets.font, "", 25, sf::Color::Black),
+    txtBtn2(assets.font, "", 25, sf::Color::Black), txtCancel(assets.font, "", 25, sf::Color::Black)
 {
-    spriteBg.setScale({view.getSize().x / assets.bg.getSize().x, view.getSize().y / assets.bg.getSize().y});  // background image can be smaller
+    assets.bg.setScale({view.getSize().x / assets.bg.getTexture().getSize().x, view.getSize().y / assets.bg.getTexture().getSize().y});  // background image can be smaller
     for (char s: {'d', 'h'})
         for (uint8_t v: {11, 12, 13, 14})
             deck.remove(s, v);
@@ -25,28 +25,12 @@ MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
     drawFunctions.clear();
     drawFunctions.push_back([this](){ drawTable(); });
     drawFunctions.push_back([](){});  // to be replaced with extra drawings
-    txtDeck.setFillColor(sf::Color::White);
-    rectAvoid.setFillColor(sf::Color::White);
-    rectAvoid.setPosition(posAvoid);
-    txtAvoid.setFillColor(sf::Color::Black);
     center(txtAvoid, rectAvoid);
-    rectDlg.setFillColor(sf::Color(0x003000FF));
-    rectDlg.setPosition(posDlg);
-    rectBtn1.setFillColor(sf::Color::White);
-    rectBtn1.setPosition(posBtn1);
-    rectBtn2.setFillColor(sf::Color::White);
-    rectBtn2.setPosition(posBtn2);
-    rectCancel.setFillColor(sf::Color::White);
-    rectCancel.setPosition(posCancel);
-    txtHealth.setFillColor(sf::Color::Yellow);
-    txtBtn1.setFillColor(sf::Color::Black);
-    txtBtn2.setFillColor(sf::Color::Black);
-    txtCancel.setFillColor(sf::Color::Black);
-    spriteSkull.setOrigin(spriteSkull.getLocalBounds().getCenter());
+    assets.skull.setOrigin(assets.skull.getLocalBounds().getCenter());
 }
 
 
-// exception used to catch window-close event in main thread
+// exception used to catch window-close event in main loop
 struct WindowClosed: public std::runtime_error {
     WindowClosed(): std::runtime_error("Window closed!") {}
 };
@@ -105,8 +89,8 @@ void MainGame::run() {
                         // monster
                         const bool canWeapon = weapon && (!lastMonster || lastMonster->value > card.value);
                         int damageBare = card.value, damageWeapon = canWeapon ? (card.value > weapon->value ? card.value - weapon->value : 0) : 0;
-                        auto res = showDialog("Fight monster (" + std::to_string(card.value) + ")?", "Barehand", (canWeapon ? "Weapon" : ""), true,
-                            &spriteSkull, &spriteSkull);
+                        auto res = showDialog("Fight monster (" + std::to_string(card.value) + ")?", "Bare hands", (canWeapon ? "Weapon" : ""), true,
+                            damageBare >= health ? &assets.skull : nullptr, damageWeapon >= health ? &assets.skull : nullptr);
                         if (res == UserInput::Btn1) {  // barehand
                             std::lock_guard lk(guiMutexDraw);
                             room[index].reset();
@@ -220,7 +204,7 @@ void MainGame::drawTable() {
     // fixed parts
     window.clear();
     window.setView(view);
-    window.draw(spriteBg);
+    window.draw(assets.bg);
     // cardd in the room
     for (int i = 0; i < 4; ++i)
         if (room[i]) {
@@ -229,8 +213,8 @@ void MainGame::drawTable() {
         }
     // back of deck and number of cards
     if (deck.num_cards()) {
-        spriteBack.setPosition(posDeck);
-        window.draw(spriteBack);
+        assets.back.setPosition(posDeck);
+        window.draw(assets.back);
     }
     txtDeck.setPosition(posDeck + szCard + sf::Vector2f{-80, 20});
     txtDeck.setString(std::to_string(deck.num_cards()));
@@ -284,8 +268,8 @@ void MainGame::drawDialog() {
 
 void MainGame::draw4Backs() {
     for (int i = 0; i < 4; ++i) {
-        spriteBack.setPosition(posRoom[i]);
-        window.draw(spriteBack);
+        assets.back.setPosition(posRoom[i]);
+        window.draw(assets.back);
     }
 }
 

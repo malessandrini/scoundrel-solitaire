@@ -20,7 +20,7 @@ extern std::vector<std::function<void()>> drawFunctions;  // to be managed by ga
 class MainGame {
 public:
     MainGame(sf::RenderWindow&, Assets&);
-    void run();
+    void run();  // executed in a separate thread from GUI
     bool isDone = false, mustQuit = false;  // to be checked by main thread
 protected:
     // geometry information
@@ -37,9 +37,9 @@ protected:
     sf::RenderWindow &window;
     sf::View view;
     Assets &assets;
-    sf::Sprite spriteBg, spriteBack, spriteSkull;
-    sf::Text txtDeck, txtAvoid, txtHealth, txtDialog, txtBtn1, txtBtn2, txtCancel;
-    sf::RectangleShape rectAvoid{szAvoid}, rectDlg{szDlg}, rectBtn1{szBtn12}, rectBtn2{szBtn12}, rectCancel{szBtnCancel};
+    MyText txtDeck, txtAvoid, txtHealth, txtDialog, txtBtn1, txtBtn2, txtCancel;
+    MyRectangleShape rectAvoid{szAvoid, sf::Color::White, posAvoid}, rectDlg{szDlg, sf::Color(0x003000FF), posDlg},
+        rectBtn1{szBtn12, sf::Color::White, posBtn1}, rectBtn2{szBtn12, sf::Color::White, posBtn2}, rectCancel{szBtnCancel, sf::Color::White, posCancel};
     //
     sf::Event waitEvent();  // automatically manages resize by calling onResize()
     enum class UserInput { Card, Avoid, Btn1, Btn2, Cancel, Esc };
@@ -50,9 +50,8 @@ protected:
     void drawDialog();
     void draw4Backs();
     static void matchAspectRatio(sf::View &view, sf::Vector2u winSize);
-    void center(sf::Text&, const sf::FloatRect&, sf::Vector2f off = {0, 0}) const;
-    void center(sf::Text&, const sf::Shape&, sf::Vector2f off = {0, 0}) const;
-    void center(sf::Sprite&, const sf::FloatRect&) const;
+    void center(sf::Text&, const sf::FloatRect&, sf::Vector2f off = {}) const;
+    void center(sf::Text&, const sf::Shape&, sf::Vector2f off = {}) const;
     int currentCards() const;
     UserInput showDialog(std::string const &text, std::string const &btn1, std::string const &btn2, bool cancel,
         sf::Sprite *spr1 = nullptr, sf::Sprite *spr2 = nullptr);
