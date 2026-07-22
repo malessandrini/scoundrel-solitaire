@@ -45,7 +45,7 @@ public:
 protected:
     void load(sf::Texture&, std::string const&);
     fs::path basePath;
-    sf::Texture t_bg, t_cards[4], t_back, t_skull;  // set of cards, one suit for image
+    sf::Texture t_bg, t_cards[8], t_back, t_skull;  // set of cards, one suit for image
 };
 
 
