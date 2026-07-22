@@ -77,6 +77,7 @@ void MainGame::run() {
                                 lastMonster.reset();
                                 weapon = card;
                                 avoidedLast = false;
+                                assets.sndMelee.play();
                             });
                         }
                     }
@@ -87,6 +88,7 @@ void MainGame::run() {
                                 room[id].reset();
                                 if (!usedHeart) {
                                     health = std::min(20, health + card.value);
+                                    assets.sndHeal.play();
                                     animHealth.restart();
                                 }
                                 usedHeart = true;
@@ -104,7 +106,11 @@ void MainGame::run() {
                             syncGui([this, id=index, damageBare](){
                                 room[id].reset();
                                 health = std::max(0, health - damageBare);
-                                if (damageBare) animHealth.restart();
+                                if (damageBare) {
+                                    assets.sndHit.play();
+                                    animHealth.restart();
+                                }
+                                else assets.sndKnife.play();
                                 avoidedLast = false;
                             });
                         }
@@ -112,7 +118,11 @@ void MainGame::run() {
                             syncGui([this, id=index, &card, damageWeapon](){
                                 room[id].reset();
                                 health = std::max(0, health - damageWeapon);
-                                if (damageWeapon) animHealth.restart();
+                                if (damageWeapon) {
+                                    assets.sndHit.play();
+                                    animHealth.restart();
+                                }
+                                else assets.sndKnife.play();
                                 lastMonster = card;
                                 avoidedLast = false;
                             });
@@ -151,6 +161,8 @@ void MainGame::run() {
         // Here: we won or we died
         while (animHealth.isRunning());
         const int score = finalScore();
+        if (score <= 0) assets.sndDie.play();
+        else assets.sndVictory.play();
         if (showDialog(std::string(score > 0 ? "You win!" : "You die!") +  "   Score: " + std::to_string(score), "Restart", "Quit", false) == UserInput::Btn2) mustQuit = true;
         isDone = true;
     }

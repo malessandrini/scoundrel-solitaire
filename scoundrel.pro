@@ -6,13 +6,13 @@ CONFIG += c++17 no_include_pwd thread
 DEFINES += SFML_STATIC
 SFML_DIR = ../../SFML-3.0.0
 INCLUDEPATH += $$SFML_DIR/include
-LIBS += -L$$SFML_DIR/build/lib -lsfml-graphics-s -lsfml-window-s -lsfml-system-s
+LIBS += -L$$SFML_DIR/build/lib -lsfml-graphics-s -lsfml-window-s  -lsfml-audio-s -lsfml-system-s
 
 win32 {
-    LIBS += -lopengl32 -lfreetype -lgdi32 -lwinmm
+    LIBS += -lopengl32 -lfreetype -lgdi32 -lwinmm -lflac -lvorbisenc -lvorbisfile -vorbis -ogg
 }
 unix {
-    LIBS += -lX11 -lfreetype -lXrandr -lXcursor -ludev -lXi
+    LIBS += -lX11 -lfreetype -lXrandr -lXcursor -ludev -lXi -lvorbisenc -lvorbisfile -lvorbis -logg -lFLAC
 }
 
 SOURCES += \

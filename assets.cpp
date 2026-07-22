@@ -3,6 +3,7 @@
 
 
 sf::Texture MySprite::dummyTexture;
+sf::SoundBuffer MySound::dummyBuffer;
 
 
 Assets::Assets() {
@@ -24,6 +25,19 @@ Assets::Assets() {
     }
     // font
     font = sf::Font(basePath / "DejaVuSans.ttf");
+    // sounds (not fatal if not found)
+    (void)b_heal.loadFromFile(basePath / "completetask_0.ogg");
+    sndHeal = MySound(b_heal);
+    (void)b_hit.loadFromFile(basePath / "hit28.ogg");
+    sndHit = MySound(b_hit);
+    (void)b_melee.loadFromFile(basePath / "melee_sound.ogg");
+    sndMelee = MySound(b_melee);
+    (void)b_knife.loadFromFile(basePath / "knifesharpener1.ogg");
+    sndKnife = MySound(b_knife);
+    (void)b_die.loadFromFile(basePath / "ghost.ogg");
+    sndDie = MySound(b_die);
+    (void)b_victory.loadFromFile(basePath / "fanfare.ogg");
+    sndVictory = MySound(b_victory);
 }
 
 

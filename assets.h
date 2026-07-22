@@ -2,6 +2,7 @@
 #define ASSETS_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <string>
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -33,6 +34,15 @@ public:
 };
 
 
+class MySound: public sf::Sound {
+    static sf::SoundBuffer dummyBuffer;
+public:
+    MySound(): sf::Sound(dummyBuffer) {}
+    using sf::Sound::Sound;
+
+};
+
+
 // Asset loader
 
 
@@ -42,10 +52,12 @@ public:
     MySprite bg, back, skull;
     std::vector<sf::Sprite> cards;  // 52 sprites
     sf::Font font;
+    MySound sndHeal, sndHit, sndMelee, sndKnife, sndDie, sndVictory;
 protected:
     void load(sf::Texture&, std::string const&);
     fs::path basePath;
     sf::Texture t_bg, t_cards[8], t_back, t_skull;  // set of cards, one suit for image
+    sf::SoundBuffer b_heal, b_hit, b_melee, b_knife, b_die, b_victory;
 };
 
 
