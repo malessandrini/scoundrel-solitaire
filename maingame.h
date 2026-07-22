@@ -41,6 +41,7 @@ protected:
     MyRectangleShape rectAvoid{szAvoid, sf::Color::White, posAvoid}, rectDlg{szDlg, sf::Color(0x003000FF), posDlg},
         rectBtn1{szBtn12, sf::Color::White, posBtn1}, rectBtn2{szBtn12, sf::Color::White, posBtn2}, rectCancel{szBtnCancel, sf::Color::White, posCancel};
     //
+    static void syncGui(std::function<void()>);  // execute a task by syncing on guiMutexDraw
     sf::Event waitEvent();  // automatically manages resize by calling onResize()
     enum class UserInput { Card, Avoid, Btn1, Btn2, Cancel, Esc };
     std::pair<UserInput,int> getInput();

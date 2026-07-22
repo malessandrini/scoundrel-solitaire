@@ -36,6 +36,12 @@ struct WindowClosed: public std::runtime_error {
 };
 
 
+void MainGame::syncGui(std::function<void ()> func) {
+    std::lock_guard lk(guiMutexDraw);
+    func();
+}
+
+
 void MainGame::run() {
     try {  // to catch WindowClosed
         while (!isDone && window.isOpen()) { // main game loop (choose card, ...)
@@ -44,7 +50,7 @@ void MainGame::run() {
             for (int i = 0; i < 4 && deck.num_cards(); ++i) {
                 if (room[i]) continue;
                 std::this_thread::sleep_for(200ms);
-                { std::lock_guard lk(guiMutexDraw); room[i] = deck.pick(); }
+                syncGui([this, i](){ room[i] = deck.pick(); });
             }
 
             // check if victory
@@ -57,10 +63,7 @@ void MainGame::run() {
             bool usedHeart = false;  // in this turn
             while (currentCards() > 1) {
                 bool canAvoid = !avoidedLast && currentCards() == 4;
-                { std::lock_guard lk(guiMutexDraw);
-                    if (canAvoid) drawFunctions[1] = [this](){ drawAvoid(); };
-                    else drawFunctions[1] = [](){};
-                }
+                syncGui([this, canAvoid](){ drawFunctions[1] = canAvoid ? std::function<void()>([this](){drawAvoid();}) : [](){}; });
                 auto [input, index] = getInput();
                 if (input == UserInput::Card && room[index]) {
                     // play a card
@@ -68,21 +71,23 @@ void MainGame::run() {
                     if (card.suit == 'd') {
                         // weapon
                         if (showDialog("Equip weapon?", "Equip", "", true) == UserInput::Btn1) {
-                            std::lock_guard lk(guiMutexDraw);
-                            room[index].reset();
-                            lastMonster.reset();
-                            weapon = card;
-                            avoidedLast = false;
+                            syncGui([this, id=index, &card](){
+                                room[id].reset();
+                                lastMonster.reset();
+                                weapon = card;
+                                avoidedLast = false;
+                            });
                         }
                     }
                     else if (card.suit == 'h') {
                         // potion
                         if (showDialog("Use potion?", (usedHeart ? "Discard" : "Heal"), "", true) == UserInput::Btn1) {
-                            std::lock_guard lk(guiMutexDraw);
-                            room[index].reset();
-                            if (!usedHeart) health = std::min(20, health + card.value);
-                            usedHeart = true;
-                            avoidedLast = false;
+                            syncGui([this, id=index, &card, &usedHeart](){
+                                room[id].reset();
+                                if (!usedHeart) health = std::min(20, health + card.value);
+                                usedHeart = true;
+                                avoidedLast = false;
+                            });
                         }
                     }
                     else {
@@ -92,17 +97,19 @@ void MainGame::run() {
                         auto res = showDialog("Fight monster (" + std::to_string(card.value) + ")?", "Bare hands", (canWeapon ? "Weapon" : ""), true,
                             damageBare >= health ? &assets.skull : nullptr, damageWeapon >= health ? &assets.skull : nullptr);
                         if (res == UserInput::Btn1) {  // barehand
-                            std::lock_guard lk(guiMutexDraw);
-                            room[index].reset();
-                            health = std::max(0, health - damageBare);
-                            avoidedLast = false;
+                            syncGui([this, id=index, damageBare](){
+                                room[id].reset();
+                                health = std::max(0, health - damageBare);
+                                avoidedLast = false;
+                            });
                         }
                         else if (res == UserInput::Btn2 && canWeapon) {  // weapon
-                            std::lock_guard lk(guiMutexDraw);
-                            room[index].reset();
-                            health = std::max(0, health - damageWeapon);
-                            lastMonster = card;
-                            avoidedLast = false;
+                            syncGui([this, id=index, &card, damageWeapon](){
+                                room[id].reset();
+                                health = std::max(0, health - damageWeapon);
+                                lastMonster = card;
+                                avoidedLast = false;
+                            });
                         }
                         if (health <= 0) {
                             break;  // will be tested below
@@ -112,17 +119,16 @@ void MainGame::run() {
                 else if (input == UserInput::Avoid && canAvoid) {
                     // avoid room
                     if (showDialog("Avoid room?", "Avoid", "", true) == UserInput::Btn1) {
-                        { std::lock_guard lk(guiMutexDraw); drawFunctions[1] = [this](){ draw4Backs(); }; }
+                        syncGui([this](){ drawFunctions[1] = [this](){ draw4Backs(); }; });
                         std::this_thread::sleep_for(500ms);
                         avoidedLast = true;
-                        {
-                            std::lock_guard lk(guiMutexDraw); drawFunctions[1] = [](){};
+                        syncGui([this](){
                             for (int i = 0; i < 4; ++i) {
                                 Card c = room[i].value();
                                 room[i].reset();
                                 deck.add(c);  // TODO: shuffle the 4 cards before putting back
                             }
-                        }
+                        });
                     }
                 }
                 else if (input == UserInput::Esc) {
@@ -195,8 +201,7 @@ std::pair<MainGame::UserInput, int> MainGame::getInput() {
 
 
 void MainGame::onResize(sf::Vector2u sz) {
-    std::lock_guard lk(guiMutexDraw);
-    matchAspectRatio(view, sz);
+    syncGui([this, sz](){  matchAspectRatio(view, sz); });
 }
 
 
@@ -338,12 +343,12 @@ MainGame::UserInput MainGame::showDialog(const std::string &text, const std::str
     }
     dlgSpr1 = spr1;
     dlgSpr2 = spr2;
-    { std::lock_guard lk(guiMutexDraw);  drawFunctions[1] = [this](){ drawDialog(); }; }
+    syncGui([this](){ drawFunctions[1] = [this](){ drawDialog(); }; });
 
     // object to remove drawDialog() function at function exit
     struct Exit {
         Exit() {}
-        ~Exit() { std::lock_guard lk(guiMutexDraw);  drawFunctions[1] = [](){}; }
+        ~Exit() { syncGui([](){ drawFunctions[1] = [](){}; }); }
     };
     Exit ex;
 
