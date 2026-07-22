@@ -9,7 +9,7 @@ INCLUDEPATH += $$SFML_DIR/include
 LIBS += -L$$SFML_DIR/build/lib -lsfml-graphics-s -lsfml-window-s  -lsfml-audio-s -lsfml-system-s
 
 win32 {
-    LIBS += -lopengl32 -lfreetype -lgdi32 -lwinmm -lflac -lvorbisenc -lvorbisfile -vorbis -ogg
+    LIBS += -lopengl32 -lfreetype -lgdi32 -lwinmm -lflac -lvorbisenc -lvorbisfile -lvorbis -logg
 }
 unix {
     LIBS += -lX11 -lfreetype -lXrandr -lXcursor -ludev -lXi -lvorbisenc -lvorbisfile -lvorbis -logg -lFLAC
