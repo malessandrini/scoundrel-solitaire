@@ -1,6 +1,4 @@
 #include "maingame.h"
-#include <thread>
-#include <chrono>
 #include <algorithm>
 using namespace std::chrono_literals;
 
@@ -50,7 +48,7 @@ void MainGame::run() {
             // fill the missing cards
             for (int i = 0; i < 4 && deck.num_cards(); ++i) {
                 if (room[i]) continue;
-                std::this_thread::sleep_for(200ms);
+                sf::sleep(200ms);
                 syncGui([this, i](){ room[i] = deck.pick(); });
             }
 
@@ -136,7 +134,7 @@ void MainGame::run() {
                     // avoid room
                     if (showDialog("Avoid room?", "Avoid", "", true) == UserInput::Btn1) {
                         syncGui([this](){ drawFunctions[1] = [this](){ draw4Backs(); }; });
-                        std::this_thread::sleep_for(500ms);
+                        sf::sleep(500ms);
                         avoidedLast = true;
                         syncGui([this](){
                             drawFunctions[1] = [](){};
