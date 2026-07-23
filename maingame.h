@@ -4,6 +4,7 @@
 
 #include "assets.h"
 #include "cards.h"
+#include "i18n.h"
 #include <SFML/Graphics.hpp>
 #include <condition_variable>
 #include <mutex>
@@ -19,7 +20,7 @@ extern std::vector<std::function<void()>> drawFunctions;  // to be managed by ga
 
 class MainGame {
 public:
-    MainGame(sf::RenderWindow&, Assets&);
+    MainGame(sf::RenderWindow&, Assets&, I18n&);
     void run();  // executed in a separate thread from GUI
     bool isDone = false, mustQuit = false;  // to be checked by main thread
 protected:
@@ -37,6 +38,7 @@ protected:
     sf::RenderWindow &window;
     sf::View view;
     Assets &assets;
+    I18n &i18n;
     MyText txtDeck, txtAvoid, txtHealth, txtDialog, txtBtn1, txtBtn2, txtCancel;
     MyRectangleShape rectAvoid{szAvoid, sf::Color::White, posAvoid}, rectDlg{szDlg, sf::Color(0x003000FF), posDlg},
         rectBtn1{szBtn12, sf::Color::White, posBtn1}, rectBtn2{szBtn12, sf::Color::White, posBtn2}, rectCancel{szBtnCancel, sf::Color::White, posCancel};

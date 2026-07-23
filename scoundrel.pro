@@ -18,10 +18,12 @@ unix {
 SOURCES += \
     assets.cpp \
     cards.cpp \
+    i18n.cpp \
     main.cpp \
     maingame.cpp
 
 HEADERS += \
     assets.h \
     cards.h \
+    i18n.h \
     maingame.h

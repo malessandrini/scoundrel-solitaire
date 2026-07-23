@@ -9,9 +9,9 @@ std::optional<sf::Event> guiEvent;
 std::vector<std::function<void()>> drawFunctions;
 
 
-MainGame::MainGame(sf::RenderWindow &w, Assets &asst):
-    window(w), view(window.getDefaultView()), assets(asst),
-    txtDeck(assets.font, "", 30, sf::Color::White), txtAvoid(assets.font, "Avoid", 30, sf::Color::Black),
+MainGame::MainGame(sf::RenderWindow &w, Assets &asst, I18n &i18n_):
+    window(w), view(window.getDefaultView()), assets(asst), i18n(i18n_),
+    txtDeck(assets.font, "", 30, sf::Color::White), txtAvoid(assets.font, i18n("avoid"), 30, sf::Color::Black),
     txtHealth(assets.font, "", 50, sf::Color::Yellow), txtDialog(assets.font, "", 35, sf::Color::White), txtBtn1(assets.font, "", 25, sf::Color::Black),
     txtBtn2(assets.font, "", 25, sf::Color::Black), txtCancel(assets.font, "", 25, sf::Color::Black)
 {

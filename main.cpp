@@ -1,16 +1,19 @@
 #include <SFML/Graphics.hpp>
 #include "maingame.h"
 #include "assets.h"
+#include "i18n.h"
 #include <thread>
 
 
 int main(int, char**) {
     sf::RenderWindow window(sf::VideoMode({1024, 768}), "Scoundrel Solitaire");
+    window.setMinimumSize(window.getSize());
 
     Assets assets;
+    I18n i18n;
 
     while (window.isOpen()) {
-        MainGame mainGameLoop(window, assets);  // create new game every time it's restarted
+        MainGame mainGameLoop(window, assets, i18n);  // create new game every time it's restarted
 
         std::thread gameThread(&MainGame::run, &mainGameLoop);
 
