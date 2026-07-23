@@ -140,10 +140,13 @@ void MainGame::run() {
                         avoidedLast = true;
                         syncGui([this](){
                             drawFunctions[1] = [](){};
-                            for (int i = 0; i < 4; ++i) {
+                            // put cards back in random order
+                            std::vector<int> v{0, 1, 2, 3};
+                            std::shuffle(v.begin(), v.end(), Deck::gen);
+                            for (int i: v) {
                                 Card c = room[i].value();
                                 room[i].reset();
-                                deck.add(c);  // TODO: shuffle the 4 cards before putting back
+                                deck.add(c);
                             }
                         });
                     }

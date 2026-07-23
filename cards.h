@@ -22,9 +22,9 @@ public:
     void add(const Card&);
     void remove(const char suit, const uint8_t number);
     const std::vector<Card>& deck() const { return cards; }
+    static std::mt19937_64 gen;
 protected:
     std::vector<Card> cards;
-    static std::mt19937_64 gen;
 };
 
 
